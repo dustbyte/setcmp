@@ -26,10 +26,13 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 
 operation_help = """
 Operation to perform on the two given sets.
-- and : return the intersection of the two sets, e.g. {1,2} and {1,3} => {1}
-- or : return the difference of the two sets, with elements in left but not right, e.g. {1,2} or {1,3} => {2}
-- xor : return the difference of the two sets, with elements in either left or right but not both, e.g. {1,2} or {1,3} => {2,3}
-- all : return a combination of both sets, e.g. {1,2} or {1,3} => {1,2,3}
+- int : return the intersection of the two sets,
+    e.g. {1,2} and {1,3} => {1}
+- diff : return the difference of the two sets, with elements in left but not right,
+    e.g. {1,2} or {1,3} => {2}
+- symdiff : return the difference of the two sets, with elements
+    in either left or right but not both, e.g. {1,2} or {1,3} => {2,3}
+- union : return a combination of both sets, e.g. {1,2} or {1,3} => {1,2,3}
 """
 
 
@@ -39,7 +42,8 @@ def abort(msg):
 
 def print_set(collection):
     for item in collection:
-        print(item)
+        if item:
+            print(item)
 
 def setfile(filename):
     if filename == '-':
@@ -52,24 +56,24 @@ def setfile(filename):
             abort(str(err))
 
 def main():
-    parser = ArgumentParser(description='Perform set operation on list of items', formatter_class=RawTextHelpFormatter)
-    parser.add_argument('left', help='Base csv file containing one item per line', type=setfile)
-    parser.add_argument('op', help=operation_help, choices=('and', 'or', 'xor', 'all'), metavar='op')
-    parser.add_argument('right', help='Other csv file containing one item per line', type=setfile)
+    parser = ArgumentParser(description='Perform set operation on list of items.', formatter_class=RawTextHelpFormatter)
+    parser.add_argument('left', help='Base csv file containing one item per line. A single dash is stdin.', type=setfile)
+    parser.add_argument('op', help=operation_help, choices=('int', 'diff', 'symdiff', 'union'), metavar='op')
+    parser.add_argument('right', help='Other csv file containing one item per line. A single dash is stdin.', type=setfile)
 
     args = parser.parse_args()
-    op = args.operation
+    op = args.op
 
-    if op == 'and':
+    if op == 'int':
         result = args.left & args.right
         print_set(result)
-    if op == 'or':
+    if op == 'diff':
         result = args.left - args.right
         print_set(result)
-    if op == 'xor':
+    if op == 'symdiff':
         result = args.left ^ args.right
         print_set(result)
-    if op == 'all':
+    if op == 'union':
         result = args.left | args.right
         print_set(result)
 
